@@ -1,14 +1,23 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  email: z.email().max(254),
-  password: z.string().min(8).max(72),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Name must be at least 2 characters")
+    .max(80, "Name must be 80 characters or fewer"),
+  email: z.email("Enter a valid email address").max(254),
+  // 72 is bcrypt's input limit: everything past byte 72 is silently ignored,
+  // so accepting a longer password would give a false sense of security.
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(72, "Password must be 72 characters or fewer"),
 });
 
 export const loginSchema = z.object({
-  email: z.email().max(254),
-  password: z.string().min(1).max(72),
+  email: z.email("Enter a valid email address").max(254),
+  password: z.string().min(1, "Password is required").max(72),
 });
 
 export const createTicketSchema = z.object({

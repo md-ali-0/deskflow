@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-
-const COOKIE_NAME = "deskflow_session";
-const MAX_AGE_SECONDS = 60 * 60 * 8; // 8 hours
+import {
+  SESSION_COOKIE_NAME,
+  SESSION_MAX_AGE_SECONDS,
+} from "@/lib/session";
 
 export type Role = "AGENT" | "ADMIN";
 
@@ -40,7 +41,7 @@ export async function signSession(user: SessionUser): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
-    .setExpirationTime(`${MAX_AGE_SECONDS}s`)
+    .setExpirationTime(`${SESSION_MAX_AGE_SECONDS}s`)
     .sign(getSecret());
 }
 
@@ -65,25 +66,25 @@ export async function verifySession(token: string): Promise<SessionUser | null> 
 
 export async function getSession(): Promise<SessionUser | null> {
   const store = await cookies();
-  const token = store.get(COOKIE_NAME)?.value;
+  const token = store.get(SESSION_COOKIE_NAME)?.value;
   if (!token) return null;
   return verifySession(token);
 }
 
 export async function setSessionCookie(token: string): Promise<void> {
   const store = await cookies();
-  store.set(COOKIE_NAME, token, {
+  store.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: MAX_AGE_SECONDS,
+    maxAge: SESSION_MAX_AGE_SECONDS,
   });
 }
 
 export async function clearSessionCookie(): Promise<void> {
   const store = await cookies();
-  store.delete(COOKIE_NAME);
+  store.delete(SESSION_COOKIE_NAME);
 }
 
 export async function requireAuth(): Promise<SessionUser> {

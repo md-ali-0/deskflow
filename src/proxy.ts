@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
-const COOKIE_NAME = "session";
+import { SESSION_COOKIE_NAME } from "@/lib/session";
 
 async function hasValidToken(token: string | undefined): Promise<boolean> {
   if (!token) return false;
@@ -17,7 +16,7 @@ async function hasValidToken(token: string | undefined): Promise<boolean> {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (await hasValidToken(request.cookies.get(COOKIE_NAME)?.value)) {
+  if (await hasValidToken(request.cookies.get(SESSION_COOKIE_NAME)?.value)) {
     return NextResponse.next();
   }
 
@@ -36,11 +35,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/",
-    "/tickets/:path*",
-    "/dashboard/:path*",
-    "/api/tickets/:path*",
-    "/api/auth/me",
-  ],
+  matcher: ["/", "/api/tickets/:path*", "/api/auth/me"],
 };
