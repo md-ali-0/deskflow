@@ -1,7 +1,7 @@
-import { jwtVerify } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
-const COOKIE_NAME = "deskflow_session";
+const COOKIE_NAME = "session";
 
 async function hasValidToken(token: string | undefined): Promise<boolean> {
   if (!token) return false;
@@ -14,7 +14,7 @@ async function hasValidToken(token: string | undefined): Promise<boolean> {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (await hasValidToken(request.cookies.get(COOKIE_NAME)?.value)) {
