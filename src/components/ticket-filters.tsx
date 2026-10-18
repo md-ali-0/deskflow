@@ -21,16 +21,9 @@ import {
 
 const ALL = "ALL";
 
-// base-ui's Select renders the raw value unless it is given a value → label
-// map, so build one that includes the "all" sentinel.
 const STATUS_ITEMS = { [ALL]: "All statuses", ...STATUS_LABELS };
 const PRIORITY_ITEMS = { [ALL]: "All priorities", ...PRIORITY_LABELS };
 
-/**
- * Filters live in the URL, not in component state, so a filtered list is
- * shareable and survives a refresh. The server component reads the same query
- * string and does the real filtering in SQL.
- */
 export function TicketFilters() {
   const router = useRouter();
   const params = useSearchParams();
@@ -48,7 +41,6 @@ export function TicketFilters() {
     router.replace(query ? `/tickets?${query}` : "/tickets");
   }
 
-  // Debounce typing so we do not hit the server on every keystroke.
   useEffect(() => {
     if (search === applied.current) return;
 
@@ -65,8 +57,7 @@ export function TicketFilters() {
     }, 300);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, params, router]);
 
   return (
     <div className="flex flex-wrap items-center gap-2">

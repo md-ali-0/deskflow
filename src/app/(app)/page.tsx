@@ -22,7 +22,7 @@ function AccountSkeleton() {
 
 async function AccountContent() {
   const user = await getSession();
-  if (!user) return null; // the layout has already redirected to /login
+  if (!user) return null;
 
   return (
     <div className="space-y-6">

@@ -25,15 +25,13 @@ const DEMO_ACCOUNTS = [
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") ?? "/";
+  const nextPath = searchParams.get("next") ?? "/tickets";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // One click fills both fields, so the demo never depends on typing a
-  // password correctly in front of an audience.
   function fillDemoAccount(account: (typeof DEMO_ACCOUNTS)[number]) {
     setEmail(account.email);
     setPassword(account.password);

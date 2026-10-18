@@ -1,9 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 
-/**
- * One place for how a status or priority is spelled and coloured. Everything
- * else in the UI reads from here, so renaming a label is a one-line change.
- */
 export const STATUS_LABELS = {
   OPEN: "Open",
   IN_PROGRESS: "In progress",

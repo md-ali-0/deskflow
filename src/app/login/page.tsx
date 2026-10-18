@@ -4,11 +4,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export const metadata = { title: "Sign in — DeskFlow" };
 
-/**
- * LoginForm reads `?next=` with useSearchParams, which is URL data that only
- * exists at request time. With cacheComponents enabled that has to sit inside a
- * Suspense boundary, otherwise prerendering throws and the page never hydrates.
- */
 function LoginFallback() {
   return (
     <Card className="w-full max-w-sm">

@@ -1,12 +1,12 @@
-import { requireAuth, toErrorResponse } from "@/lib/auth";
+import { requireAuthFromRequest, toErrorResponse } from "@/lib/auth";
 import { statusChangeSchema } from "@/lib/validation/ticket";
 import { getTicket, transitionStatus } from "@/services/ticket.service";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(_request: Request, { params }: Context) {
+export async function GET(request: Request, { params }: Context) {
   try {
-    await requireAuth();
+    await requireAuthFromRequest(request);
     const { id } = await params;
     const ticket = await getTicket(id);
     return Response.json({ ticket });
@@ -17,7 +17,7 @@ export async function GET(_request: Request, { params }: Context) {
 
 export async function PATCH(request: Request, { params }: Context) {
   try {
-    const user = await requireAuth();
+    const user = await requireAuthFromRequest(request);
     const { id } = await params;
 
     const body = await request.json().catch(() => null);

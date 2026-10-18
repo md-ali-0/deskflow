@@ -34,7 +34,6 @@ export function NewTicketDialog({ categories }: { categories: Category[] }) {
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [priority, setPriority] = useState("MEDIUM");
 
-  // value → label map so the trigger shows "Billing · 4h SLA", not a UUID.
   const categoryItems = Object.fromEntries(
     categories.map((category) => [
       category.id,

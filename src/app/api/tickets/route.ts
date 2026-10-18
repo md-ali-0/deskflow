@@ -1,4 +1,4 @@
-import { requireAuth, toErrorResponse } from "@/lib/auth";
+import { requireAuthFromRequest, toErrorResponse } from "@/lib/auth";
 import {
   createTicketSchema,
   listTicketsQuerySchema,
@@ -7,7 +7,7 @@ import { createTicket, listTickets } from "@/services/ticket.service";
 
 export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireAuthFromRequest(request);
 
     const url = new URL(request.url);
     const parsed = listTicketsQuerySchema.safeParse(
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const user = await requireAuth();
+    const user = await requireAuthFromRequest(request);
 
     const body = await request.json().catch(() => null);
     const parsed = createTicketSchema.safeParse(body);

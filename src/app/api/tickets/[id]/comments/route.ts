@@ -1,4 +1,4 @@
-import { requireAuth, toErrorResponse } from "@/lib/auth";
+import { requireAuthFromRequest, toErrorResponse } from "@/lib/auth";
 import { commentSchema } from "@/lib/validation/ticket";
 import { addComment } from "@/services/ticket.service";
 
@@ -6,7 +6,7 @@ type Context = { params: Promise<{ id: string }> };
 
 export async function POST(request: Request, { params }: Context) {
   try {
-    const user = await requireAuth();
+    const user = await requireAuthFromRequest(request);
     const { id } = await params;
 
     const body = await request.json().catch(() => null);

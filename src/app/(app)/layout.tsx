@@ -4,12 +4,6 @@ import { Suspense, type ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
 import { getSession } from "@/lib/auth";
 
-/**
- * Everything behind this layout depends on the session cookie, which only
- * exists at request time. With cacheComponents enabled, request-time data has
- * to sit inside a Suspense boundary — otherwise the route cannot be prerendered
- * and the dev overlay reports it as an error.
- */
 async function Shell({ children }: { children: ReactNode }) {
   await connection();
 

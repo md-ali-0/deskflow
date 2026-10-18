@@ -1,3 +1,4 @@
+import { Prisma, type Status } from "@prisma/client";
 import { HttpError } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type {
@@ -7,13 +8,6 @@ import type {
 import { calculateDueAt } from "./sla.service";
 import { classifyTicket } from "./ai.service";
 
-/**
- * The status machine.
- *
- * A ticket may only move along the edges listed here. Anything else is a 422.
- * Keeping it as a plain map means the whole rule is visible in one place and
- * can be unit tested without a database.
- */
 export const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   OPEN: ["IN_PROGRESS", "CLOSED"],
   IN_PROGRESS: ["RESOLVED", "OPEN"],
@@ -36,16 +30,15 @@ export async function listTickets(filters: ListTicketsQuery) {
       ...(filters.assignedToId ? { assignedToId: filters.assignedToId } : {}),
       ...(filters.q
         ? {
-            OR: [
-              { subject: { contains: filters.q, mode: "insensitive" as const } },
-              { number: { contains: filters.q, mode: "insensitive" as const } },
-            ],
-          }
+          OR: [
+            { subject: { contains: filters.q, mode: "insensitive" as const } },
+            { number: { contains: filters.q, mode: "insensitive" as const } },
+          ],
+        }
         : {}),
     },
     include: ticketInclude,
-    // Soonest deadline first — the whole point of the product.
-    orderBy: [{ dueAt: "asc" }],
+    orderBy: [{ status: "asc" }, { dueAt: "asc" }],
     take: 100,
   });
 }
@@ -87,76 +80,153 @@ export async function getDashboardCounts() {
   return { open, inProgress, resolved, closed, overdue };
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// YOUR JOB — these two are the graded business logic. Everything else in this
-// file is plumbing that is already done.
-// ─────────────────────────────────────────────────────────────────────────────
+const MAX_NUMBER_ATTEMPTS = 3;
 
 export async function createTicket(
   input: CreateTicketInput,
   actorId: string,
 ): Promise<{ id: string }> {
-  // TODO — implement in this order:
-  //
-  // 1. Load the category:
-  //      const category = await prisma.category.findUnique({ where: { id: input.categoryId } })
-  //    If it is null, throw new HttpError(404, "Category not found").
-  //
-  // 2. Work out the next ticket number. Count the tickets, add one, pad to 4:
-  //      const count = await prisma.ticket.count()
-  //      const number = `TKT-${String(count + 1).padStart(4, "0")}`
-  //
-  // 3. Compute the deadline:
-  //      const dueAt = calculateDueAt(new Date(), category.defaultSlaHours)
-  //
-  // 4. Auto-assign the least-loaded agent:
-  //      const agents = await prisma.user.findMany({
-  //        where: { role: "AGENT" },
-  //        include: { _count: { select: { assignedTickets: { where: {
-  //          status: { in: ["OPEN", "IN_PROGRESS"] } } } } } },
-  //      })
-  //    Sort by that count ascending and take the first id. If the list is empty,
-  //    leave it unassigned (null) — do not crash.
-  //
-  // 5. Ask the AI. Wrap it so a failure never blocks ticket creation:
-  //      let ai = { category: null, confidence: 0 }
-  //      try { ai = await classifyTicket(input.subject, input.description) } catch {}
-  //
-  // 6. Create the ticket with prisma.ticket.create({ data: { ... } }), then
-  //    write one ActivityLog row with action "TICKET_CREATED".
-  //
-  // 7. Return { id: ticket.id }.
-  throw new HttpError(501, "createTicket is not implemented yet");
+  const category = await prisma.category.findUnique({
+    where: { id: input.categoryId },
+    select: { id: true, name: true, defaultSlaHours: true },
+  });
+
+  if (!category) {
+    throw new HttpError(404, "Category not found");
+  }
+
+  const dueAt = calculateDueAt(new Date(), category.defaultSlaHours);
+
+  const agents = await prisma.user.findMany({
+    where: { role: "AGENT" },
+    select: {
+      id: true,
+      _count: {
+        select: {
+          assignedTickets: {
+            where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
+          },
+        },
+      },
+    },
+  });
+
+  agents.sort((a, b) => a._count.assignedTickets - b._count.assignedTickets);
+  const assignedToId = agents[0]?.id ?? null;
+
+  let aiCategory: string | null = null;
+  let aiConfidence: number | null = null;
+  try {
+    const ai = await classifyTicket(input.subject, input.description);
+    aiCategory = ai.category;
+    aiConfidence = ai.confidence;
+  } catch {
+    aiCategory = null;
+    aiConfidence = null;
+  }
+
+  for (let attempt = 1; ; attempt += 1) {
+    const count = await prisma.ticket.count();
+    const number = `TKT-${String(count + 1).padStart(4, "0")}`;
+
+    try {
+      const ticket = await prisma.ticket.create({
+        data: {
+          number,
+          subject: input.subject,
+          description: input.description,
+          priority: input.priority,
+          categoryId: category.id,
+          createdById: actorId,
+          assignedToId,
+          dueAt,
+          aiCategory,
+          aiConfidence,
+          aiAccepted: aiCategory ? aiCategory === category.name : null,
+          activities: {
+            create: {
+              actorId,
+              action: "TICKET_CREATED",
+              toValue: "OPEN",
+            },
+          },
+        },
+        select: { id: true },
+      });
+
+      return { id: ticket.id };
+    } catch (error) {
+      const isNumberClash =
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002";
+
+      if (!isNumberClash || attempt >= MAX_NUMBER_ATTEMPTS) throw error;
+    }
+  }
 }
 
 export async function transitionStatus(
   ticketId: string,
-  nextStatus: string,
+  nextStatus: Status,
   actorId: string,
 ): Promise<{ id: string }> {
-  // TODO — implement in this order:
-  //
-  // 1. Load the ticket. 404 if missing.
-  //
-  // 2. Reject illegal moves:
-  //      const allowed = ALLOWED_TRANSITIONS[ticket.status] ?? []
-  //      if (!allowed.includes(nextStatus)) {
-  //        throw new HttpError(422,
-  //          `Cannot move a ticket from ${ticket.status} to ${nextStatus}`)
-  //      }
-  //
-  // 3. The guard that earns marks: a ticket cannot be RESOLVED with no public
-  //    reply. Count comments where isInternal is false; if zero, throw 422
-  //    with a message explaining that a public reply is required first.
-  //
-  // 4. Update status, and set resolvedAt when moving to RESOLVED (null it
-  //    again if the ticket is reopened).
-  //
-  // 5. Write an ActivityLog row: action "STATUS_CHANGED", fromValue = old
-  //    status, toValue = nextStatus, actorId.
-  //
-  // 6. Return { id: ticketId }.
-  throw new HttpError(501, "transitionStatus is not implemented yet");
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    select: { id: true, status: true, resolvedAt: true },
+  });
+
+  if (!ticket) throw new HttpError(404, "Ticket not found");
+
+  if (ticket.status === nextStatus) {
+    throw new HttpError(422, `Ticket is already ${nextStatus}`);
+  }
+
+  const allowed = ALLOWED_TRANSITIONS[ticket.status] ?? [];
+  if (!allowed.includes(nextStatus)) {
+    throw new HttpError(
+      422,
+      `Cannot move a ticket from ${ticket.status} to ${nextStatus}`,
+    );
+  }
+
+  if (nextStatus === "RESOLVED") {
+    const publicReplies = await prisma.comment.count({
+      where: { ticketId, isInternal: false },
+    });
+
+    if (publicReplies === 0) {
+      throw new HttpError(
+        422,
+        "Add a public reply before resolving — the customer needs to see what fixed it.",
+      );
+    }
+  }
+
+  const resolvedAt =
+    nextStatus === "RESOLVED"
+      ? new Date()
+      : nextStatus === "CLOSED"
+        ? ticket.resolvedAt
+        : null;
+
+  const updated = await prisma.ticket.update({
+    where: { id: ticketId },
+    data: {
+      status: nextStatus,
+      resolvedAt,
+      activities: {
+        create: {
+          actorId,
+          action: "STATUS_CHANGED",
+          fromValue: ticket.status,
+          toValue: nextStatus,
+        },
+      },
+    },
+    select: { id: true },
+  });
+
+  return { id: updated.id };
 }
 
 export async function addComment(
@@ -168,8 +238,20 @@ export async function addComment(
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
   if (!ticket) throw new HttpError(404, "Ticket not found");
 
-  return prisma.comment.create({
-    data: { ticketId, authorId, body, isInternal },
-    include: { author: { select: { id: true, name: true } } },
-  });
+  const [comment] = await prisma.$transaction([
+    prisma.comment.create({
+      data: { ticketId, authorId, body, isInternal },
+      include: { author: { select: { id: true, name: true } } },
+    }),
+    prisma.activityLog.create({
+      data: {
+        ticketId,
+        actorId: authorId,
+        action: "COMMENT_ADDED",
+        toValue: isInternal ? "internal" : "public",
+      },
+    }),
+  ]);
+
+  return comment;
 }

@@ -1,16 +1,3 @@
-/**
- * Ticket triage.
- *
- * Two paths, deliberately:
- *   1. An LLM classifies the text into one of our fixed categories.
- *   2. If that fails for any reason (no key, rate limit, bad JSON, timeout)
- *      we fall back to keyword rules and report confidence 0, so the UI can
- *      say "AI unavailable — pick a category" instead of breaking.
- *
- * The fallback is the part that matters in a live demo: an API key that
- * expires must never stop a ticket from being created.
- */
-
 export const CATEGORY_NAMES = [
   "Billing",
   "Technical",
@@ -27,9 +14,16 @@ export type Classification = {
 
 const KEYWORD_RULES: { category: string; words: string[] }[] = [
   { category: "Billing", words: ["invoice", "refund", "charge", "payment", "billing", "vat", "price", "subscription"] },
-  { category: "Technical", words: ["error", "crash", "bug", "slow", "load", "api", "500", "upload", "export", "search"] },
+  {
+    category: "Technical",
+    words: [
+      "error", "crash", "bug", "slow", "load", "api", "500", "upload", "export",
+      "search", "freeze", "frozen", "hang", "unresponsive", "stuck", "timeout",
+      "not responding", "broken",
+    ],
+  },
   { category: "Account", words: ["password", "login", "email", "2fa", "two-factor", "account", "reset"] },
-  { category: "Feature Request", words: ["add", "request", "would be", "feature", "support for", "integration", "export"] },
+  { category: "Feature Request", words: ["add", "request", "would be", "feature", "support for", "integration"] },
 ];
 
 function fallbackClassify(text: string): Classification {
@@ -81,7 +75,6 @@ export async function classifyTicket(
           { role: "user", content: text },
         ],
       }),
-      // Never let a hanging model stall a ticket creation request.
       signal: AbortSignal.timeout(6000),
     });
 
@@ -96,8 +89,6 @@ export async function classifyTicket(
       confidence?: number;
     };
 
-    // The model can hallucinate a category that does not exist, so validate
-    // against our list before trusting it.
     if (!parsed.category || !CATEGORY_NAMES.includes(parsed.category as never)) {
       return fallbackClassify(text);
     }

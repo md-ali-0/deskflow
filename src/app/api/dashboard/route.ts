@@ -1,9 +1,9 @@
-import { requireAuth, toErrorResponse } from "@/lib/auth";
+import { requireAuthFromRequest, toErrorResponse } from "@/lib/auth";
 import { getDashboardCounts } from "@/services/ticket.service";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    await requireAuth();
+    await requireAuthFromRequest(request);
     const counts = await getDashboardCounts();
     return Response.json(counts);
   } catch (error) {

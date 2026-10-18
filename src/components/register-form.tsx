@@ -33,7 +33,6 @@ export function RegisterForm() {
     setError(null);
     setFieldErrors({});
 
-    // Cheap client-side check so the obvious mistake never hits the network.
     if (password !== confirm) {
       setFieldErrors({ confirm: "The two passwords do not match" });
       return;
@@ -53,8 +52,6 @@ export function RegisterForm() {
       };
 
       if (!response.ok) {
-        // The server returns zod issues as an array; surface the first one
-        // against its own field instead of dumping a JSON blob on the user.
         const first = data.issues?.[0];
         if (first) {
           setFieldErrors({ [String(first.path[0])]: first.message });
@@ -64,8 +61,7 @@ export function RegisterForm() {
         return;
       }
 
-      // Register signs the user straight in, so go to the app.
-      router.push("/");
+      router.push("/tickets");
       router.refresh();
     } catch {
       setError("Network error — check your connection and try again.");

@@ -24,13 +24,8 @@ export function formatDate(value: Date | string): string {
   return dateFormatter.format(toDate(value));
 }
 
-/** Statuses that stop the SLA clock. */
 const SLA_STOPPED = new Set(["RESOLVED", "CLOSED"]);
 
-/**
- * Turns a due date into something a human can act on: "3d overdue",
- * "in 6h", or the plain date once the clock has stopped.
- */
 export function dueLabel(
   dueAt: Date | string,
   status: string,
@@ -63,7 +58,6 @@ export function isOverdue(dueAt: Date | string, status: string): boolean {
   return dueLabel(dueAt, status).overdue;
 }
 
-/** TKT-0001 → #0001, purely cosmetic. */
 export function shortNumber(number: string): string {
   return number.replace(/^TKT-/, "#");
 }

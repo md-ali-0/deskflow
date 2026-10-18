@@ -71,6 +71,36 @@ export async function getSession(): Promise<SessionUser | null> {
   return verifySession(token);
 }
 
+function readCookie(header: string | null, name: string): string | undefined {
+  if (!header) return undefined;
+
+  for (const part of header.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    if (key === name) return decodeURIComponent(rest.join("="));
+  }
+
+  return undefined;
+}
+
+export async function getSessionFromRequest(
+  request: Request,
+): Promise<SessionUser | null> {
+  const token = readCookie(
+    request.headers.get("cookie"),
+    SESSION_COOKIE_NAME,
+  );
+  if (!token) return null;
+  return verifySession(token);
+}
+
+export async function requireAuthFromRequest(
+  request: Request,
+): Promise<SessionUser> {
+  const user = await getSessionFromRequest(request);
+  if (!user) throw new HttpError(401, "Authentication required");
+  return user;
+}
+
 export async function setSessionCookie(token: string): Promise<void> {
   const store = await cookies();
   store.set(SESSION_COOKIE_NAME, token, {
@@ -87,22 +117,18 @@ export async function clearSessionCookie(): Promise<void> {
   store.delete(SESSION_COOKIE_NAME);
 }
 
-export async function requireAuth(): Promise<SessionUser> {
-  const user = await getSession();
-  if (!user) throw new HttpError(401, "Authentication required");
-  return user;
-}
-
-export async function requireAdmin(): Promise<SessionUser> {
-  const user = await requireAuth();
-  if (user.role !== "ADMIN") throw new HttpError(403, "Admin access required");
-  return user;
+function isFrameworkSignal(error: unknown): boolean {
+  const digest = (error as { digest?: unknown } | null)?.digest;
+  return typeof digest === "string" && digest.startsWith("NEXT_");
 }
 
 export function toErrorResponse(error: unknown): Response {
+  if (isFrameworkSignal(error)) throw error;
+
   if (error instanceof HttpError) {
     return Response.json({ error: error.message }, { status: error.status });
   }
+
   console.error(error);
   return Response.json({ error: "Internal server error" }, { status: 500 });
 }

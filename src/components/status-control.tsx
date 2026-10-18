@@ -12,11 +12,6 @@ import {
 } from "@/components/ui/select";
 import { STATUS_LABELS, statusLabel } from "@/components/status-badge";
 
-/**
- * Only the transitions the state machine allows are offered, so the UI and the
- * server rule cannot drift apart — the list is computed on the server from
- * ALLOWED_TRANSITIONS and passed down as a prop.
- */
 export function StatusControl({
   ticketId,
   status,
@@ -74,7 +69,7 @@ export function StatusControl({
       onValueChange={(value) => change(String(value))}
       disabled={pending}
     >
-      <SelectTrigger className="w-44">
+      <SelectTrigger className="w-44" aria-label="Change status">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

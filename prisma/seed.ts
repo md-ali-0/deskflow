@@ -277,7 +277,7 @@ async function main() {
   await prisma.user.create({
     data: {
       email: "admin@deskflow.dev",
-      name: "Rafiq Hasan",
+      name: "Mohammad Ali",
       role: Role.ADMIN,
       passwordHash: adminHash,
     },
