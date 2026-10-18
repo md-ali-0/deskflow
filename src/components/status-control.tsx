@@ -37,6 +37,12 @@ export function StatusControl({
         error?: string;
       };
 
+      if (response.status === 401) {
+        toast.error(payload.error ?? "Your session expired. Sign in again.");
+        router.push("/login");
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(payload.error ?? "Could not change the status");
       }

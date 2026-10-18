@@ -31,6 +31,12 @@ export function CommentForm({ ticketId }: { ticketId: string }) {
         error?: string;
       };
 
+      if (response.status === 401) {
+        toast.error(payload.error ?? "Your session expired. Sign in again.");
+        router.push("/login");
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(payload.error ?? "Could not post the reply");
       }

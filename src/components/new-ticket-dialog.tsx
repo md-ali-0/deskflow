@@ -63,6 +63,12 @@ export function NewTicketDialog({ categories }: { categories: Category[] }) {
         error?: string;
       };
 
+      if (response.status === 401) {
+        toast.error(payload.error ?? "Your session expired. Sign in again.");
+        router.push("/login");
+        return;
+      }
+
       if (!response.ok || !payload.ticket) {
         throw new Error(payload.error ?? "Could not create the ticket");
       }

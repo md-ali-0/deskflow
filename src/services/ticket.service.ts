@@ -1,6 +1,7 @@
 import { Prisma, type Status } from "@prisma/client";
 import { HttpError } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { canResolve, isTransitionAllowed } from "@/lib/ticket-rules";
 import type {
   CreateTicketInput,
   ListTicketsQuery,
@@ -8,12 +9,7 @@ import type {
 import { calculateDueAt } from "./sla.service";
 import { classifyTicket } from "./ai.service";
 
-export const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-  OPEN: ["IN_PROGRESS", "CLOSED"],
-  IN_PROGRESS: ["RESOLVED", "OPEN"],
-  RESOLVED: ["CLOSED", "IN_PROGRESS"],
-  CLOSED: [],
-};
+export { ALLOWED_TRANSITIONS } from "@/lib/ticket-rules";
 
 const ticketInclude = {
   category: true,
@@ -156,11 +152,18 @@ export async function createTicket(
 
       return { id: ticket.id };
     } catch (error) {
-      const isNumberClash =
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2002";
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2003") {
+          throw new HttpError(
+            401,
+            "Your session is no longer valid. Sign in again.",
+          );
+        }
 
-      if (!isNumberClash || attempt >= MAX_NUMBER_ATTEMPTS) throw error;
+        if (error.code === "P2002" && attempt < MAX_NUMBER_ATTEMPTS) continue;
+      }
+
+      throw error;
     }
   }
 }
@@ -181,8 +184,7 @@ export async function transitionStatus(
     throw new HttpError(422, `Ticket is already ${nextStatus}`);
   }
 
-  const allowed = ALLOWED_TRANSITIONS[ticket.status] ?? [];
-  if (!allowed.includes(nextStatus)) {
+  if (!isTransitionAllowed(ticket.status, nextStatus)) {
     throw new HttpError(
       422,
       `Cannot move a ticket from ${ticket.status} to ${nextStatus}`,
@@ -194,7 +196,7 @@ export async function transitionStatus(
       where: { ticketId, isInternal: false },
     });
 
-    if (publicReplies === 0) {
+    if (!canResolve(publicReplies)) {
       throw new HttpError(
         422,
         "Add a public reply before resolving — the customer needs to see what fixed it.",
@@ -238,20 +240,34 @@ export async function addComment(
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
   if (!ticket) throw new HttpError(404, "Ticket not found");
 
-  const [comment] = await prisma.$transaction([
-    prisma.comment.create({
-      data: { ticketId, authorId, body, isInternal },
-      include: { author: { select: { id: true, name: true } } },
-    }),
-    prisma.activityLog.create({
-      data: {
-        ticketId,
-        actorId: authorId,
-        action: "COMMENT_ADDED",
-        toValue: isInternal ? "internal" : "public",
-      },
-    }),
-  ]);
+  try {
+    const [comment] = await prisma.$transaction([
+      prisma.comment.create({
+        data: { ticketId, authorId, body, isInternal },
+        include: { author: { select: { id: true, name: true } } },
+      }),
+      prisma.activityLog.create({
+        data: {
+          ticketId,
+          actorId: authorId,
+          action: "COMMENT_ADDED",
+          toValue: isInternal ? "internal" : "public",
+        },
+      }),
+    ]);
 
-  return comment;
+    return comment;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      throw new HttpError(
+        401,
+        "Your session is no longer valid. Sign in again.",
+      );
+    }
+
+    throw error;
+  }
 }

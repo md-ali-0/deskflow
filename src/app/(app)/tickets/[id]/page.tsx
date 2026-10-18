@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/card";
 import { formatDateTime, dueLabel, initials, shortNumber } from "@/lib/format";
 import { HttpError } from "@/lib/auth";
-import { ALLOWED_TRANSITIONS, getTicket } from "@/services/ticket.service";
+import { ALLOWED_TRANSITIONS } from "@/lib/ticket-rules";
+import { getTicket } from "@/services/ticket.service";
 
 type Params = Promise<{ id: string }>;
 
