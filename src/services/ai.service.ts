@@ -26,12 +26,22 @@ const KEYWORD_RULES: { category: string; words: string[] }[] = [
   { category: "Feature Request", words: ["add", "request", "would be", "feature", "support for", "integration"] },
 ];
 
+function wordPattern(word: string): RegExp {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`\\b${escaped}\\b`, "i");
+}
+
+const COMPILED_RULES = KEYWORD_RULES.map((rule) => ({
+  category: rule.category,
+  patterns: rule.words.map(wordPattern),
+}));
+
 function fallbackClassify(text: string): Classification {
   const haystack = text.toLowerCase();
 
   let best = { category: "Other", hits: 0 };
-  for (const rule of KEYWORD_RULES) {
-    const hits = rule.words.filter((w) => haystack.includes(w)).length;
+  for (const rule of COMPILED_RULES) {
+    const hits = rule.patterns.filter((pattern) => pattern.test(haystack)).length;
     if (hits > best.hits) best = { category: rule.category, hits };
   }
 
@@ -67,10 +77,14 @@ export async function classifyTicket(
           {
             role: "system",
             content:
-              `You classify support tickets. Reply with JSON only: ` +
-              `{"category": one of ${JSON.stringify(CATEGORY_NAMES)}, ` +
-              `"confidence": number between 0 and 1, ` +
-              `"reason": one short sentence}.`,
+              `You classify support tickets for a B2B SaaS help desk.\n` +
+              `Choose exactly one category:\n` +
+              `- Billing: invoices, charges, refunds, payments, pricing, VAT, subscriptions\n` +
+              `- Technical: errors, crashes, slow or frozen pages, uploads, exports, search, broken integrations\n` +
+              `- Account: login, password, 2FA, email address, profile or account settings\n` +
+              `- Feature Request: asking for functionality that does not exist yet\n` +
+              `- Other: anything that does not fit the above\n` +
+              `Reply with JSON only: {"category": string, "confidence": number between 0 and 1, "reason": one short sentence}.`,
           },
           { role: "user", content: text },
         ],
