@@ -8,6 +8,29 @@ Built for the NT Tech Innovation full-stack assessment.
 - Repository: https://github.com/md-ali-0/deskflow
 - Live demo: _(add the deployed URL here)_
 
+## Deploying
+
+The build needs a generated Prisma client, so `package.json` runs `prisma generate`
+as a `postinstall` hook. Without it the build fails with
+`Module '"@prisma/client"' has no exported member 'PrismaClient'` and a cascade of
+implicit-`any` errors.
+
+1. Create a PostgreSQL database (Neon, Supabase or any managed Postgres).
+2. Import the repo into Vercel and set two environment variables for all
+   environments: `DATABASE_URL` and `JWT_SECRET`. `DATABASE_URL` must be present at
+   build time, because `prisma.config.ts` reads it while the client is generated.
+3. Prepare the database once from your machine, pointing at the production URL:
+
+   ```bash
+   DATABASE_URL="postgresql://…" npx prisma migrate deploy
+   DATABASE_URL="postgresql://…" npx prisma db seed
+   ```
+
+4. Deploy, then sign in with the demo credentials above.
+
+The `AI_*` variables are optional in production too; without them triage uses the
+keyword fallback.
+
 ## What it does
 
 - **Tickets** with a category, priority, requester and assignee.
