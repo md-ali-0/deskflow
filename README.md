@@ -81,7 +81,7 @@ Fill in `.env`:
 | `JWT_SECRET` | yes | Signing key for the session cookie — any long random string |
 | `AI_API_KEY` | no | OpenAI-compatible API key for triage |
 | `AI_BASE_URL` | no | Any OpenAI-compatible base URL, e.g. `https://api.xkiro.com/v1` |
-| `AI_MODEL` | no | A chat model the provider serves, e.g. `mistralai/mistral-small-2603` |
+| `AI_MODEL` | no | A chat model the provider serves, e.g. `qwen/qwen3.8-max:free` |
 
 The three `AI_*` variables are optional. Leave them empty and triage falls back to
 keyword rules, which is the default state of a fresh clone.
