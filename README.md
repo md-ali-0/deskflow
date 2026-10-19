@@ -80,8 +80,8 @@ Fill in `.env`:
 | `DATABASE_URL` | yes | PostgreSQL connection string |
 | `JWT_SECRET` | yes | Signing key for the session cookie — any long random string |
 | `AI_API_KEY` | no | OpenAI-compatible API key for triage |
-| `AI_BASE_URL` | no | e.g. `https://api.openai.com/v1` |
-| `AI_MODEL` | no | e.g. `gpt-4o-mini` |
+| `AI_BASE_URL` | no | Any OpenAI-compatible base URL, e.g. `https://api.xkiro.com/v1` |
+| `AI_MODEL` | no | A chat model the provider serves, e.g. `mistralai/mistral-small-2603` |
 
 The three `AI_*` variables are optional. Leave them empty and triage falls back to
 keyword rules, which is the default state of a fresh clone.
