@@ -6,7 +6,7 @@ cannot be bypassed, and AI triage that suggests a category as each ticket arrive
 Built for the NT Tech Innovation full-stack assessment.
 
 - Repository: https://github.com/md-ali-0/deskflow
-- Live demo: _(add the deployed URL here)_
+- Live demo: https://deskflow-liart.vercel.app
 
 ## Deploying
 
@@ -200,6 +200,13 @@ ticket, moving its status and adding a reply all use a nested write or
 fall through to keyword rules with `confidence: 0`. The ticket is created either way;
 `aiAccepted` records whether the human's category matched the suggestion, so the
 accuracy claim is measurable rather than asserted.
+
+**Pages stream instead of blocking.** The header needs `connection()` and every page
+needs the database, so both sit inside their own `<Suspense>` boundary in the app
+layout. The shell arrives first, each page shows a skeleton sized to its real layout
+while the query runs, and the content fills in. `cacheComponents` also *requires*
+this: anything read at request time must be inside a boundary, and the
+`dynamic` route-segment config is rejected outright.
 
 ## Testing
 

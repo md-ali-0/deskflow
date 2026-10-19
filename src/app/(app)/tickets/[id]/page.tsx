@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { CommentForm } from "@/components/comment-form";
+import { DetailSkeleton } from "@/components/page-skeleton";
 import { PriorityBadge, StatusBadge } from "@/components/status-badge";
 import { StatusControl } from "@/components/status-control";
 import { Badge } from "@/components/ui/badge";
@@ -262,7 +263,7 @@ async function TicketDetailContent({ params }: { params: Params }) {
 
 export default function TicketDetailPage({ params }: { params: Params }) {
   return (
-    <Suspense fallback={<div className="h-64" />}>
+    <Suspense fallback={<DetailSkeleton />}>
       <TicketDetailContent params={params} />
     </Suspense>
   );

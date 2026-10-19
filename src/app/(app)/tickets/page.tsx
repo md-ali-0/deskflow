@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { NewTicketDialog } from "@/components/new-ticket-dialog";
+import { PageSkeleton } from "@/components/page-skeleton";
 import { PriorityBadge, StatusBadge } from "@/components/status-badge";
 import { TicketFilters } from "@/components/ticket-filters";
 import { Button } from "@/components/ui/button";
@@ -156,7 +157,7 @@ export default function TicketsPage({
   searchParams: SearchParams;
 }) {
   return (
-    <Suspense fallback={<div className="h-64" />}>
+    <Suspense fallback={<PageSkeleton />}>
       <TicketsContent searchParams={searchParams} />
     </Suspense>
   );
