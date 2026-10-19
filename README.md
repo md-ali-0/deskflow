@@ -96,6 +96,11 @@ The seed wipes and recreates every row, including the users, so it also invalida
 any session cookie that was issued before it ran. If you re-seed while signed in,
 sign out and back in.
 
+Each seeded ticket is also run through triage, so the demo data has a suggestion and
+a confidence on every ticket and `aiAccepted` has something to measure. That means
+seeding takes a few seconds longer and, with `AI_*` configured, makes one model call
+per ticket; without it the keyword fallback fills the same fields with confidence 0.
+
 Open http://localhost:3000 — you will be redirected to the login page.
 
 ### Demo credentials

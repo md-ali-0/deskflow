@@ -2,6 +2,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Priority, PrismaClient, Role, Status } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
+import { classifyTicket } from "../src/services/ai.service";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -326,6 +327,8 @@ async function main() {
 
     const assignee = t.assignee === null ? null : agents[t.assignee];
 
+    const ai = await classifyTicket(t.subject, t.description);
+
     const ticket = await prisma.ticket.create({
       data: {
         number: `TKT-${String(index).padStart(4, "0")}`,
@@ -338,6 +341,9 @@ async function main() {
         assignedToId: assignee?.id ?? null,
         dueAt,
         resolvedAt,
+        aiCategory: ai.category,
+        aiConfidence: ai.confidence,
+        aiAccepted: ai.category === t.category,
         createdAt,
         updatedAt: resolvedAt ?? createdAt,
       },

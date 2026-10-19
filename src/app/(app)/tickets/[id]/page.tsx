@@ -206,12 +206,16 @@ async function TicketDetailContent({ params }: { params: Params }) {
                     <Badge variant="secondary">{ticket.aiCategory}</Badge>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-muted-foreground">Confidence</span>
+                    <span className="text-muted-foreground">Source</span>
                     <span>
-                      {ticket.aiConfidence != null
-                        ? `${Math.round(ticket.aiConfidence * 100)}%`
-                        : "—"}
+                      {ticket.aiConfidence
+                        ? `Model · ${Math.round(ticket.aiConfidence * 100)}% confident`
+                        : "Keyword fallback"}
                     </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-muted-foreground">Chosen category</span>
+                    <span>{ticket.aiAccepted ? "Matched" : "Differed"}</span>
                   </div>
                 </>
               ) : (
