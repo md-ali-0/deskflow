@@ -27,6 +27,8 @@
 .claude
 .cursor
 .devin
+.workbuddy-ai
+/output/
 
 # debug
 npm-debug.log*

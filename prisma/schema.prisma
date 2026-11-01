@@ -1,3 +1,27 @@
+// ============================================================================
+//                    DESKFLOW - PRISMA DATABASE SCHEMA (POSTGRESQL)
+// ============================================================================
+// 
+// [আর্কিটেকচারাল সারসংক্ষেপ / Database Architecture]:
+// এই স্কিমাটি DeskFlow অ্যাপ্লিকেশনের PostgreSQL রিলেশনাল ডাটাবেজ মডেল সংজ্ঞায়িত করে।
+// 
+// [ইন্টারভিউ স্পেশাল পয়েন্ট / Key Talking Points for Interview]:
+// ১. Normalization & Relational Integrity:
+//    - ৩য় নরমাল ফর্ম (3NF) মেনে ডেটাবেজ ডিজাইন করা হয়েছে, যাতে কোনো রিডানড্যান্ট ডেটা না থাকে।
+//    - ইউজার এবং টিকিটের মধ্যে দুটি ভিন্ন সম্পর্ক তৈরি করা হয়েছে:
+//      - 'CreatedTickets': কে টিকিট তৈরি করেছে (Customer/Agent)।
+//      - 'AssignedTickets': কোন এজেন্টকে সমাধান করার দায়িত্ব দেওয়া হয়েছে।
+// ২. Data-Driven SLA Architecture:
+//    - SLA ঘন্টা কোডে হার্ডকোড না করে `Category` মডেলে `defaultSlaHours` ফিল্ডে রাখা হয়েছে। 
+//      এতে ভবিষ্যৎ অ্যাডমিন প্যানেল থেকে যেকোনো সময় SLA পরিবর্তন করা সম্ভব।
+// ৩. ডাটাবেজ ইনডেক্সিং অপ্টিমাইজেশন (B-Tree Indexes):
+//    - `@@index([status])`: ড্যাশবোর্ড ও ফিল্টারিংয়ে স্ট্যাটাস কুয়েরির পারফরম্যান্স বাড়ায়।
+//    - `@@index([dueAt])`: ওভারডিউ কুয়েরিতে Full Table Scan পরিহার করে দ্রুত ইনডেক্স রেঞ্জ স্ক্যান চালায়।
+//    - `@@index([assignedToId])`: লোড ব্যালেন্সিংয়ে এজেন্টের কাজের চাপ দ্রুত বের করতে সহায়ক।
+// ৪. Immutable Audit Trail (ActivityLog):
+//    - প্রতিটি স্ট্যাটাস পরিবর্তন এবং টিকিট তৈরির একটি অপরিবর্তনীয় হিস্ট্রি সংরক্ষিত হয়।
+// ============================================================================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,11 +30,13 @@ datasource db {
   provider = "postgresql"
 }
 
+// ব্যবহারকারীর অ্যাক্সেস লেভেল রোল
 enum Role {
   AGENT
   ADMIN
 }
 
+// টিকিটের অনুমোদিত স্টেট মেশিন স্ট্যাটাস
 enum Status {
   OPEN
   IN_PROGRESS
@@ -18,6 +44,7 @@ enum Status {
   CLOSED
 }
 
+// টিকিটের গুরুত্ব বা প্রায়োরিটি লেভেল
 enum Priority {
   LOW
   MEDIUM
@@ -25,14 +52,16 @@ enum Priority {
   URGENT
 }
 
+// ১. ইউজার মডেল (সাপোর্ট এজেন্ট ও অ্যাডমিন)
 model User {
   id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
+  email        String   @unique // ডুপ্লিকেট অ্যাকাউন্ট প্রতিরোধে ইউনিক ইনডেক্স
+  passwordHash String   // bcrypt দিয়ে হ্যাশ করা পাসওয়ার্ড (প্লেইন টেক্সট কখনোই সেভ হয় না)
   name         String
   role         Role     @default(AGENT)
   createdAt    DateTime @default(now())
 
+  // একই ইউজারের সাথে টিকিটের দুটি পৃথক রিলেশন
   createdTickets  Ticket[] @relation("CreatedTickets")
   assignedTickets Ticket[] @relation("AssignedTickets")
 
@@ -40,37 +69,43 @@ model User {
   activities ActivityLog[]
 }
 
+// ২. ক্যাটাগরি মডেল (SLA নিয়মাবলী সহ)
 model Category {
   id              String @id @default(uuid())
   name            String @unique
-  defaultSlaHours Int
+  defaultSlaHours Int    // ক্যাটাগরি ভিত্তিক সমাধানের অনুমোদিত সময় (ঘন্টায়)
 
   tickets Ticket[]
 }
 
+// ৩. কোর টিকিট মডেল (লাইফসাইকেল ও AI ট্রায়াজ সহ)
 model Ticket {
   id          String   @id @default(uuid())
-  number      String   @unique
+  number      String   @unique // হিউম্যান রিডেবল ট্র্যাকিং আইডি (যেমন: TKT-0001)
   subject     String
   description String
   status      Status   @default(OPEN)
   priority    Priority @default(MEDIUM)
 
+  // ক্যাটাগরি রিলেশন
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
 
+  // টিকিট প্রস্তুতকারক ইউজার রিলেশন
   createdById String
   createdBy   User   @relation("CreatedTickets", fields: [createdById], references: [id])
 
+  // যে এজেন্টের ওপর সমাধানের দায়িত্ব অর্পিত হয়েছে (Load-balanced)
   assignedToId String?
   assignedTo   User?   @relation("AssignedTickets", fields: [assignedToId], references: [id])
 
-  dueAt      DateTime
-  resolvedAt DateTime?
+  dueAt      DateTime  // SLA ডেডলাইন টাইমস্ট্যাম্প
+  resolvedAt DateTime? // টিকিট সমাধানের প্রকৃত সময় (Quality tracking)
 
-  aiCategory   String?
-  aiConfidence Float?
-  aiAccepted   Boolean?
+  // AI ট্রায়াজ অডিট মেট্রিক্স
+  aiCategory   String?   // AI যে ক্যাটাগরি সাজেস্ট করেছিল
+  aiConfidence Float?    // AI এর কনফিডেন্স স্কোর (0.0 থেকে 1.0)
+  aiAccepted   Boolean?  // ইউজার AI-এর ক্যাটাগরি মেনে নিয়েছে কি না
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -78,11 +113,13 @@ model Ticket {
   comments   Comment[]
   activities ActivityLog[]
 
+  // দ্রুত ফিল্টারিং এবং SLA ওভারডিউ রেঞ্জ স্ক্যানের জন্য B-Tree ইনডেক্স
   @@index([status])
   @@index([assignedToId])
   @@index([dueAt])
 }
 
+// ৪. কমেন্ট ও ইন্টারনাল নোট মডেল
 model Comment {
   id         String   @id @default(uuid())
   ticketId   String
@@ -90,22 +127,25 @@ model Comment {
   authorId   String
   author     User     @relation(fields: [authorId], references: [id])
   body       String
-  isInternal Boolean  @default(false)
+  isInternal Boolean  @default(false) // true হলে ইন্টারনাল নোট (কাস্টমার থেকে গোপন)
   createdAt  DateTime @default(now())
 
+  // নির্দিষ্ট টিকিটের কমেন্টগুলো দ্রুত জয়েন করতে ইনডেক্স
   @@index([ticketId])
 }
 
+// ৫. অডিট অ্যাক্টিভিটি টাইমলাইন মডেল
 model ActivityLog {
   id        String   @id @default(uuid())
   ticketId  String
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   actorId   String?
   actor     User?    @relation(fields: [actorId], references: [id])
-  action    String
-  fromValue String?
-  toValue   String?
+  action    String   // উদাহরণ: "TICKET_CREATED", "STATUS_CHANGED", "COMMENT_ADDED"
+  fromValue String?  // পরিবর্তনের পূর্বের মান (যেমন: "OPEN")
+  toValue   String?  // পরিবর্তনের পরের মান (যেমন: "IN_PROGRESS")
   createdAt DateTime @default(now())
 
+  // টিকিটের হিস্ট্রি টাইমলাইন দ্রুত রেন্ডার করতে ইনডেক্স
   @@index([ticketId])
 }

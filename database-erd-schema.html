@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeskFlow - Database Schema & ERD</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #111827;
+      background: #f8fafc;
+      line-height: 1.45;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 28px 24px;
+    }
+
+    /* Print Action Bar (Hidden in Print) */
+    .no-print {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .btn-print {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-print:hover {
+      background: #334155;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 18px;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 10px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .header p {
+      font-size: 12.5px;
+      color: #4b5563;
+      margin-top: 2px;
+    }
+
+    .meta-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 8px 12px;
+      margin-bottom: 20px;
+      font-size: 11.5px;
+    }
+
+    .meta-box span {
+      color: #64748b;
+      display: block;
+      font-size: 11px;
+    }
+
+    .meta-box strong {
+      color: #0f172a;
+    }
+
+    /* Section Headings */
+    h2.section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      border-bottom: 1.5px solid #0f172a;
+      padding-bottom: 4px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    /* ERD Container */
+    .erd-wrap {
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      background: #ffffff;
+      padding: 10px 8px;
+      margin-bottom: 16px;
+    }
+
+    .erd-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Tables */
+    .table-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-title span.tag {
+      font-size: 10.5px;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 1px 6px;
+      border-radius: 3px;
+      border: 1px solid #cbd5e1;
+    }
+
+    table.schema-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+
+    table.schema-table th,
+    table.schema-table td {
+      border: 1px solid #cbd5e1;
+      padding: 5px 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    table.schema-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 11.5px;
+    }
+
+    table.schema-table td.col-name {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    table.schema-table td.col-type {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      color: #2563eb;
+      white-space: nowrap;
+    }
+
+    table.schema-table td.col-attr {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10.5px;
+      color: #475569;
+    }
+
+    table.schema-table td.col-desc {
+      color: #334155;
+      font-size: 11.5px;
+    }
+
+    .badge-pk {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #dc2626;
+      margin-right: 3px;
+    }
+
+    .badge-fk {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #2563eb;
+      margin-right: 3px;
+    }
+
+    .badge-idx {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #059669;
+      margin-right: 3px;
+    }
+
+    /* Architecture List */
+    .notes-list {
+      list-style-type: none;
+      margin-top: 8px;
+      margin-bottom: 14px;
+    }
+
+    .notes-list li {
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #334155;
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .notes-list li::before {
+      content: "•";
+      position: absolute;
+      left: 2px;
+      color: #0f172a;
+      font-weight: bold;
+    }
+
+    .notes-list strong {
+      color: #0f172a;
+    }
+
+    .notes-list code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    /* State Machine Flow */
+    .fsm-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      padding: 8px 12px;
+      margin-top: 10px;
+      font-size: 11.5px;
+    }
+
+    .fsm-steps {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 5px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .fsm-pill {
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: #ffffff;
+      border: 1px solid #94a3b8;
+    }
+
+    /* Page Splitting */
+    .print-page {
+      margin-bottom: 24px;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 10mm;
+      }
+
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        color: #000000 !important;
+      }
+
+      .container {
+        border: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .print-page {
+        margin-bottom: 0 !important;
+        break-after: page !important;
+        page-break-after: always !important;
+      }
+
+      .print-page:last-child {
+        break-after: auto !important;
+        page-break-after: auto !important;
+      }
+
+      table.schema-table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- Top Action Bar (Hidden in Print) -->
+    <div class="no-print">
+      <div style="font-size: 12.5px; color: #64748b;">
+        DeskFlow Database Architecture &bull; A4 Printable Documentation
+      </div>
+      <button class="btn-print" onclick="window.print()">🖨️ প্রিন্ট করুন (Ctrl + P)</button>
+    </div>
+
+    <!-- ================= PAGE 1: ERD & ARCHITECTURE OVERVIEW ================= -->
+    <div class="print-page">
+
+      <!-- Header -->
+      <div class="header">
+        <h1>DeskFlow — Database Schema & ERD</h1>
+        <p>PostgreSQL 16+ &bull; Prisma ORM &bull; Third Normal Form (3NF) &bull; NT Tech Innovation Prep</p>
+      </div>
+
+      <!-- Meta Summary -->
+      <div class="meta-box">
+        <div>
+          <span>Database Engine</span>
+          <strong>PostgreSQL 16+</strong>
+        </div>
+        <div>
+          <span>ORM Layer</span>
+          <strong>Prisma 7</strong>
+        </div>
+        <div>
+          <span>Normalization</span>
+          <strong>Third Normal Form (3NF)</strong>
+        </div>
+        <div>
+          <span>Core Models</span>
+          <strong>5 Models, 3 Enums</strong>
+        </div>
+      </div>
+
+      <!-- Section 1: ERD -->
+      <h2 class="section-title">১. Entity Relationship Diagram (ERD)</h2>
+
+      <div class="erd-wrap">
+        <svg class="erd-svg" viewBox="0 0 710 285" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5"
+              orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#334155" />
+            </marker>
+          </defs>
+
+          <!-- User Table -->
+          <g id="table-user">
+            <rect x="10" y="15" width="160" height="120" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 10 15 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="18" y="32" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">User</text>
+            <text x="130" y="32" font-size="9.5" fill="#64748b" font-family="sans-serif">Identity</text>
+            <line x1="10" y1="39" x2="170" y2="39" stroke="#cbd5e1" stroke-width="1" />
+
+            <text x="18" y="55" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
+            <text x="38" y="55" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
+
+            <text x="18" y="71" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">UK</text>
+            <text x="38" y="71" font-size="10" font-family="monospace" fill="#0f172a">email : String</text>
+
+            <text x="38" y="87" font-size="10" font-family="monospace" fill="#0f172a">passwordHash</text>
+            <text x="38" y="103" font-size="10" font-family="monospace" fill="#0f172a">name : String</text>
+            <text x="38" y="119" font-size="10" font-family="monospace" fill="#0f172a">role : Role (Enum)</text>
+          </g>
+
+          <!-- Category Table -->
+          <g id="table-category">
+            <rect x="10" y="160" width="160" height="95" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 10 160 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="18" y="177" font-size="11.5" font-weight="700" fill="#0f172a"
+              font-family="sans-serif">Category</text>
+            <text x="110" y="177" font-size="9.5" fill="#64748b" font-family="sans-serif">SLA Master</text>
+            <line x1="10" y1="184" x2="170" y2="184" stroke="#cbd5e1" stroke-width="1" />
+
+            <text x="18" y="200" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
+            <text x="38" y="200" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
+
+            <text x="18" y="216" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">UK</text>
+            <text x="38" y="216" font-size="10" font-family="monospace" fill="#0f172a">name : String</text>
+
+            <text x="38" y="232" font-size="10" font-family="monospace" fill="#0f172a">defaultSlaHours : Int</text>
+          </g>
+
+          <!-- Ticket Table (Core) -->
+          <g id="table-ticket">
+            <rect x="245" y="15" width="220" height="255" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+            <path d="M 245 15 h 220 v 24 h -220 z" fill="#e2e8f0" />
+            <text x="255" y="32" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">Ticket (Core
+              Entity)</text>
+            <line x1="245" y1="39" x2="465" y2="39" stroke="#94a3b8" stroke-width="1" />
+
+            <text x="255" y="55" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
+            <text x="278" y="55" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
+
+            <text x="255" y="71" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">UK</text>
+            <text x="278" y="71" font-size="10" font-family="monospace" fill="#0f172a">number : String (TKT-001)</text>
+
+            <text x="255" y="87" font-size="10" font-family="monospace" fill="#059669" font-weight="bold">IX</text>
+            <text x="278" y="87" font-size="10" font-family="monospace" fill="#0f172a">status : Status (Enum)</text>
+
+            <text x="278" y="103" font-size="10" font-family="monospace" fill="#0f172a">priority : Priority
+              (Enum)</text>
+
+            <text x="255" y="119" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="278" y="119" font-size="10" font-family="monospace" fill="#0f172a">categoryId → Category</text>
+
+            <text x="255" y="135" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="278" y="135" font-size="10" font-family="monospace" fill="#0f172a">createdById → User</text>
+
+            <text x="255" y="151" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="278" y="151" font-size="10" font-family="monospace" fill="#0f172a">assignedToId → User?</text>
+
+            <text x="255" y="167" font-size="10" font-family="monospace" fill="#059669" font-weight="bold">IX</text>
+            <text x="278" y="167" font-size="10" font-family="monospace" fill="#0f172a">dueAt : DateTime (SLA)</text>
+
+            <text x="278" y="183" font-size="10" font-family="monospace" fill="#0f172a">resolvedAt : DateTime?</text>
+            <text x="278" y="199" font-size="10" font-family="monospace" fill="#475569">aiCategory : String?</text>
+            <text x="278" y="215" font-size="10" font-family="monospace" fill="#475569">aiConfidence : Float?</text>
+            <text x="278" y="231" font-size="10" font-family="monospace" fill="#475569">aiAccepted : Boolean?</text>
+            <text x="278" y="247" font-size="10" font-family="monospace" fill="#475569">createdAt, updatedAt</text>
+          </g>
+
+          <!-- Comment Table -->
+          <g id="table-comment">
+            <rect x="540" y="15" width="160" height="120" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 540 15 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="550" y="32" font-size="11.5" font-weight="700" fill="#0f172a"
+              font-family="sans-serif">Comment</text>
+            <text x="640" y="32" font-size="9.5" fill="#64748b" font-family="sans-serif">Discussion</text>
+            <line x1="540" y1="39" x2="700" y2="39" stroke="#cbd5e1" stroke-width="1" />
+
+            <text x="550" y="55" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
+            <text x="570" y="55" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
+
+            <text x="550" y="71" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="570" y="71" font-size="10" font-family="monospace" fill="#0f172a">ticketId → Ticket</text>
+
+            <text x="550" y="87" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="570" y="87" font-size="10" font-family="monospace" fill="#0f172a">authorId → User</text>
+
+            <text x="570" y="103" font-size="10" font-family="monospace" fill="#0f172a">body : Text</text>
+            <text x="570" y="119" font-size="10" font-family="monospace" fill="#0f172a">isInternal : Boolean</text>
+          </g>
+
+          <!-- ActivityLog Table -->
+          <g id="table-activity">
+            <rect x="540" y="160" width="160" height="105" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 540 160 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="550" y="177" font-size="11.5" font-weight="700" fill="#0f172a"
+              font-family="sans-serif">ActivityLog</text>
+            <text x="645" y="177" font-size="9.5" fill="#64748b" font-family="sans-serif">Audit Trail</text>
+            <line x1="540" y1="184" x2="700" y2="184" stroke="#cbd5e1" stroke-width="1" />
+
+            <text x="550" y="200" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
+            <text x="570" y="200" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
+
+            <text x="550" y="216" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="570" y="216" font-size="10" font-family="monospace" fill="#0f172a">ticketId → Ticket</text>
+
+            <text x="550" y="232" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
+            <text x="570" y="232" font-size="10" font-family="monospace" fill="#0f172a">actorId → User?</text>
+
+            <text x="570" y="248" font-size="10" font-family="monospace" fill="#0f172a">action : String</text>
+          </g>
+
+          <!-- Relationship Connectors (Clean Straight Lines in 75px Gaps) -->
+          <!-- User -> Ticket (createdById) -->
+          <line x1="170" y1="55" x2="238" y2="55" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="204" y="47" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">created
+            (1:N)</text>
+
+          <!-- User -> Ticket (assignedToId) -->
+          <line x1="170" y1="115" x2="238" y2="115" stroke="#334155" stroke-width="1.2" stroke-dasharray="3,3"
+            marker-end="url(#arrow)" />
+          <text x="204" y="107" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">assigned
+            (0..1)</text>
+
+          <!-- Category -> Ticket (categoryId) -->
+          <line x1="170" y1="200" x2="238" y2="200" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="204" y="192" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">category
+            (1:N)</text>
+
+          <!-- Ticket -> Comment (ticketId) -->
+          <line x1="465" y1="55" x2="533" y2="55" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="499" y="47" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">comments
+            (1:N)</text>
+
+          <!-- Ticket -> ActivityLog (ticketId) -->
+          <line x1="465" y1="200" x2="533" y2="200" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="499" y="192" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">logs
+            (1:N)</text>
+
+          <!-- User -> Comment (authorId) -->
+          <path d="M 90 15 C 90 2, 620 2, 620 15" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,3"
+            marker-end="url(#arrow)" />
+          <text x="355" y="10" font-size="8.5" fill="#64748b" font-family="sans-serif" text-anchor="middle">author
+            (1:N)</text>
+        </svg>
+      </div>
+
+      <!-- Relationship Summary Table -->
+      <table class="schema-table" style="margin-bottom: 12px;">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Parent Model</th>
+            <th style="width: 25%;">Child Model</th>
+            <th style="width: 22%;">Foreign Key</th>
+            <th style="width: 28%;">Relationship & Behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>User</strong></td>
+            <td>Ticket</td>
+            <td><code>createdById</code></td>
+            <td>1:N (যে ইউজার টিকিট ওপেন করেছে)</td>
+          </tr>
+          <tr>
+            <td><strong>User</strong></td>
+            <td>Ticket</td>
+            <td><code>assignedToId</code></td>
+            <td>0..1:N (দায়িত্বপ্রাপ্ত এজেন্ট; Nullable)</td>
+          </tr>
+          <tr>
+            <td><strong>Category</strong></td>
+            <td>Ticket</td>
+            <td><code>categoryId</code></td>
+            <td>1:N (SLA পলিসি ও ক্যাটাগরি ম্যাপিং)</td>
+          </tr>
+          <tr>
+            <td><strong>Ticket</strong></td>
+            <td>Comment</td>
+            <td><code>ticketId</code></td>
+            <td>1:N (<code>ON DELETE CASCADE</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>User</strong></td>
+            <td>Comment</td>
+            <td><code>authorId</code></td>
+            <td>1:N (কমেন্ট প্রদানকারী ইউজার)</td>
+          </tr>
+          <tr>
+            <td><strong>Ticket</strong></td>
+            <td>ActivityLog</td>
+            <td><code>ticketId</code></td>
+            <td>1:N (<code>ON DELETE CASCADE</code>)</td>
+          </tr>
+          <tr>
+            <td><strong>User</strong></td>
+            <td>ActivityLog</td>
+            <td><code>actorId</code></td>
+            <td>0..1:N (সিস্টেম ইভেন্টের ক্ষেত্রে Null)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- FSM Box -->
+      <div class="fsm-box">
+        <strong>টিকিট লাইফসাইকেল স্টেট মেশিন (Finite State Machine):</strong>
+        <div class="fsm-steps">
+          <span class="fsm-pill">OPEN</span>
+          <span>→</span>
+          <span class="fsm-pill">IN_PROGRESS</span>
+          <span>→</span>
+          <span class="fsm-pill">RESOLVED (Public reply required)</span>
+          <span>→</span>
+          <span class="fsm-pill">CLOSED (Terminal)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= PAGE 2: CORE TABLES ================= -->
+    <div class="print-page">
+
+      <h2 class="section-title">২. Database Tables & Data Dictionary (কোর স্কিমা)</h2>
+
+      <!-- Table: tickets -->
+      <div class="table-title">
+        <div><strong>tickets</strong> — হেল্পডেস্ক টিকিট মাস্টার রেকর্ড</div>
+        <span class="tag">Core Entity</span>
+      </div>
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Column</th>
+            <th style="width: 16%;">Type</th>
+            <th style="width: 26%;">Constraints / Default</th>
+            <th style="width: 36%;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-name"><span class="badge-pk">PK</span>id</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">@default(uuid())</td>
+            <td class="col-desc">সার্বজনীন প্রাইমারি কী (Unique Immutable ID)</td>
+          </tr>
+          <tr>
+            <td class="col-name">number</td>
+            <td class="col-type">VARCHAR(30)</td>
+            <td class="col-attr">@unique</td>
+            <td class="col-desc">হিউম্যান-রিডেবল ট্র্যাকিং আইডি (যেমন: TKT-001)</td>
+          </tr>
+          <tr>
+            <td class="col-name">subject</td>
+            <td class="col-type">VARCHAR(255)</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">টিকিটের শিরোনাম (Zod: 3 to 255 chars)</td>
+          </tr>
+          <tr>
+            <td class="col-name">description</td>
+            <td class="col-type">TEXT</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">গ্রাহকের সমস্যার পূর্ণ বিবরণী</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-idx">IX</span>status</td>
+            <td class="col-type">Status (Enum)</td>
+            <td class="col-attr">@default(OPEN)</td>
+            <td class="col-desc">OPEN, IN_PROGRESS, RESOLVED, CLOSED</td>
+          </tr>
+          <tr>
+            <td class="col-name">priority</td>
+            <td class="col-type">Priority (Enum)</td>
+            <td class="col-attr">@default(MEDIUM)</td>
+            <td class="col-desc">LOW, MEDIUM, HIGH, URGENT</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span>categoryId</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">FK → Category.id</td>
+            <td class="col-desc">ক্যাটাগরি আইডি (যেখান থেকে SLA নির্ধারিত হয়)</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span>createdById</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">FK → User.id</td>
+            <td class="col-desc">যে ইউজার টিকিটটি তৈরি করেছেন</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span><span class="badge-idx">IX</span>assignedToId</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">Nullable (FK → User.id)</td>
+            <td class="col-desc">যে এজেন্টের ওপর দায়িত্ব ন্যস্ত (ইনডেক্সড)</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-idx">IX</span>dueAt</td>
+            <td class="col-type">TIMESTAMP</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">SLA ডেডলাইন টাইমস্ট্যাম্প (B-Tree রেঞ্জ স্ক্যান)</td>
+          </tr>
+          <tr>
+            <td class="col-name">resolvedAt</td>
+            <td class="col-type">TIMESTAMP</td>
+            <td class="col-attr">Nullable</td>
+            <td class="col-desc">টিকিট সমাধানের প্রকৃত সময়</td>
+          </tr>
+          <tr>
+            <td class="col-name">aiCategory</td>
+            <td class="col-type">VARCHAR(80)</td>
+            <td class="col-attr">Nullable</td>
+            <td class="col-desc">AI ট্রায়াজ সাজেস্টেড ক্যাটাগরি</td>
+          </tr>
+          <tr>
+            <td class="col-name">aiConfidence</td>
+            <td class="col-type">FLOAT</td>
+            <td class="col-attr">Nullable</td>
+            <td class="col-desc">AI কনফিডেন্স স্কোর (0.0 to 1.0)</td>
+          </tr>
+          <tr>
+            <td class="col-name">aiAccepted</td>
+            <td class="col-type">BOOLEAN</td>
+            <td class="col-attr">Nullable</td>
+            <td class="col-desc">কাস্টমার AI ক্যাটাগরি গ্রহণ করেছে কি না</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Table: users -->
+      <div class="table-title">
+        <div><strong>users</strong> — ব্যবহারকারী ও সাপোর্ট স্টাফ অ্যাকাউন্ট</div>
+        <span class="tag">Identity</span>
+      </div>
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Column</th>
+            <th style="width: 16%;">Type</th>
+            <th style="width: 26%;">Constraints / Default</th>
+            <th style="width: 36%;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-name"><span class="badge-pk">PK</span>id</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">@default(uuid())</td>
+            <td class="col-desc">ইউজারের ইউনিক আইডি (JWT সাবজেক্ট ক্লেইম)</td>
+          </tr>
+          <tr>
+            <td class="col-name">email</td>
+            <td class="col-type">VARCHAR(254)</td>
+            <td class="col-attr">@unique</td>
+            <td class="col-desc">লগইন ইমেইল (B-Tree Unique Index)</td>
+          </tr>
+          <tr>
+            <td class="col-name">passwordHash</td>
+            <td class="col-type">VARCHAR(255)</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">bcrypt দ্বারা হ্যাশকৃত পাসওয়ার্ড</td>
+          </tr>
+          <tr>
+            <td class="col-name">name</td>
+            <td class="col-type">VARCHAR(80)</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">ইউজারের পূর্ণ নাম</td>
+          </tr>
+          <tr>
+            <td class="col-name">role</td>
+            <td class="col-type">Role (Enum)</td>
+            <td class="col-attr">@default(AGENT)</td>
+            <td class="col-desc">অ্যাক্সেস কন্ট্রোল রোল: <code>AGENT</code>, <code>ADMIN</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Table: categories -->
+      <div class="table-title">
+        <div><strong>categories</strong> — ডাটা-ড্রাইভেন SLA কনফিগারেশন</div>
+        <span class="tag">Data-Driven SLA</span>
+      </div>
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Column</th>
+            <th style="width: 16%;">Type</th>
+            <th style="width: 26%;">Constraints / Default</th>
+            <th style="width: 36%;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-name"><span class="badge-pk">PK</span>id</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">@default(uuid())</td>
+            <td class="col-desc">ক্যাটাগরি প্রাইমারি কী</td>
+          </tr>
+          <tr>
+            <td class="col-name">name</td>
+            <td class="col-type">VARCHAR(80)</td>
+            <td class="col-attr">@unique</td>
+            <td class="col-desc">ক্যাটাগরি নাম (Billing, Technical, etc.)</td>
+          </tr>
+          <tr>
+            <td class="col-name">defaultSlaHours</td>
+            <td class="col-type">INTEGER</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">সমাধানের অনুমোদিত সর্বোচ্চ সময় (ঘন্টায়)</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+    <!-- ================= PAGE 3: SUPPORTING TABLES & INTERVIEW DEFENSE ================= -->
+    <div class="print-page">
+
+      <!-- Table: comments -->
+      <div class="table-title" style="margin-top: 0;">
+        <div><strong>comments</strong> — গ্রাহক আলোচনা ও ইন্টারনাল নোটস</div>
+        <span class="tag">Discussion</span>
+      </div>
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Column</th>
+            <th style="width: 16%;">Type</th>
+            <th style="width: 26%;">Constraints / Default</th>
+            <th style="width: 36%;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-name"><span class="badge-pk">PK</span>id</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">@default(uuid())</td>
+            <td class="col-desc">কমেন্ট প্রাইমারি কী</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span><span class="badge-idx">IX</span>ticketId</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">FK → Ticket.id (ON DELETE CASCADE)</td>
+            <td class="col-desc">টিকিট আইডি (টিকিট মুছলে অটো ডিলিট)</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span>authorId</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">FK → User.id</td>
+            <td class="col-desc">মন্তব্য প্রদানকারী ইউজারের আইডি</td>
+          </tr>
+          <tr>
+            <td class="col-name">body</td>
+            <td class="col-type">TEXT</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">মন্তব্য বা সমাধানের বিবরণ</td>
+          </tr>
+          <tr>
+            <td class="col-name">isInternal</td>
+            <td class="col-type">BOOLEAN</td>
+            <td class="col-attr">@default(false)</td>
+            <td class="col-desc">false = গ্রাহক দেখতে পায়, true = অভ্যন্তরীণ নোট</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Table: activity_logs -->
+      <div class="table-title">
+        <div><strong>activity_logs</strong> — অপরিবর্তনীয় অডিট ট্রেইল</div>
+        <span class="tag">Audit Trail</span>
+      </div>
+      <table class="schema-table">
+        <thead>
+          <tr>
+            <th style="width: 22%;">Column</th>
+            <th style="width: 16%;">Type</th>
+            <th style="width: 26%;">Constraints / Default</th>
+            <th style="width: 36%;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-name"><span class="badge-pk">PK</span>id</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">@default(uuid())</td>
+            <td class="col-desc">লগ প্রাইমারি কী</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span><span class="badge-idx">IX</span>ticketId</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">FK → Ticket.id (ON DELETE CASCADE)</td>
+            <td class="col-desc">যে টিকিটের ওপর ইভেন্টটি ঘটেছে</td>
+          </tr>
+          <tr>
+            <td class="col-name"><span class="badge-fk">FK</span>actorId</td>
+            <td class="col-type">UUID</td>
+            <td class="col-attr">Nullable (FK → User.id)</td>
+            <td class="col-desc">ইভেন্ট সম্পাদনকারী (সিস্টেমের ক্ষেত্রে Null)</td>
+          </tr>
+          <tr>
+            <td class="col-name">action</td>
+            <td class="col-type">VARCHAR(50)</td>
+            <td class="col-attr">NOT NULL</td>
+            <td class="col-desc">TICKET_CREATED, STATUS_CHANGED, ইত্যাদি</td>
+          </tr>
+          <tr>
+            <td class="col-name">fromValue / toValue</td>
+            <td class="col-type">VARCHAR(50)</td>
+            <td class="col-attr">Nullable</td>
+            <td class="col-desc">পূর্বের ও পরের অবস্থা (যেমন: OPEN → IN_PROGRESS)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
