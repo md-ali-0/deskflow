@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -318,10 +319,11 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
-    
+
     <!-- Top Action Bar (Hidden in Print) -->
     <div class="no-print">
       <div style="font-size: 12.5px; color: #64748b;">
@@ -332,7 +334,7 @@
 
     <!-- ================= PAGE 1: ERD & ARCHITECTURE OVERVIEW ================= -->
     <div class="print-page">
-      
+
       <!-- Header -->
       <div class="header">
         <h1>DeskFlow — Database Schema & ERD</h1>
@@ -361,29 +363,30 @@
 
       <!-- Section 1: ERD -->
       <h2 class="section-title">১. Entity Relationship Diagram (ERD)</h2>
-      
+
       <div class="erd-wrap">
         <svg class="erd-svg" viewBox="0 0 710 285" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#334155"/>
+            <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5"
+              orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#334155" />
             </marker>
           </defs>
 
           <!-- User Table -->
           <g id="table-user">
-            <rect x="10" y="15" width="160" height="120" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2"/>
-            <path d="M 10 15 h 160 v 24 h -160 z" fill="#f1f5f9"/>
+            <rect x="10" y="15" width="160" height="120" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 10 15 h 160 v 24 h -160 z" fill="#f1f5f9" />
             <text x="18" y="32" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">User</text>
             <text x="130" y="32" font-size="9.5" fill="#64748b" font-family="sans-serif">Identity</text>
-            <line x1="10" y1="39" x2="170" y2="39" stroke="#cbd5e1" stroke-width="1"/>
-            
+            <line x1="10" y1="39" x2="170" y2="39" stroke="#cbd5e1" stroke-width="1" />
+
             <text x="18" y="55" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
             <text x="38" y="55" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
-            
+
             <text x="18" y="71" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">UK</text>
             <text x="38" y="71" font-size="10" font-family="monospace" fill="#0f172a">email : String</text>
-            
+
             <text x="38" y="87" font-size="10" font-family="monospace" fill="#0f172a">passwordHash</text>
             <text x="38" y="103" font-size="10" font-family="monospace" fill="#0f172a">name : String</text>
             <text x="38" y="119" font-size="10" font-family="monospace" fill="#0f172a">role : Role (Enum)</text>
@@ -391,51 +394,54 @@
 
           <!-- Category Table -->
           <g id="table-category">
-            <rect x="10" y="160" width="160" height="95" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2"/>
-            <path d="M 10 160 h 160 v 24 h -160 z" fill="#f1f5f9"/>
-            <text x="18" y="177" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">Category</text>
+            <rect x="10" y="160" width="160" height="95" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 10 160 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="18" y="177" font-size="11.5" font-weight="700" fill="#0f172a"
+              font-family="sans-serif">Category</text>
             <text x="110" y="177" font-size="9.5" fill="#64748b" font-family="sans-serif">SLA Master</text>
-            <line x1="10" y1="184" x2="170" y2="184" stroke="#cbd5e1" stroke-width="1"/>
-            
+            <line x1="10" y1="184" x2="170" y2="184" stroke="#cbd5e1" stroke-width="1" />
+
             <text x="18" y="200" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
             <text x="38" y="200" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
-            
+
             <text x="18" y="216" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">UK</text>
             <text x="38" y="216" font-size="10" font-family="monospace" fill="#0f172a">name : String</text>
-            
+
             <text x="38" y="232" font-size="10" font-family="monospace" fill="#0f172a">defaultSlaHours : Int</text>
           </g>
 
           <!-- Ticket Table (Core) -->
           <g id="table-ticket">
-            <rect x="245" y="15" width="220" height="255" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
-            <path d="M 245 15 h 220 v 24 h -220 z" fill="#e2e8f0"/>
-            <text x="255" y="32" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">Ticket (Core Entity)</text>
-            <line x1="245" y1="39" x2="465" y2="39" stroke="#94a3b8" stroke-width="1"/>
-            
+            <rect x="245" y="15" width="220" height="255" rx="4" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+            <path d="M 245 15 h 220 v 24 h -220 z" fill="#e2e8f0" />
+            <text x="255" y="32" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">Ticket (Core
+              Entity)</text>
+            <line x1="245" y1="39" x2="465" y2="39" stroke="#94a3b8" stroke-width="1" />
+
             <text x="255" y="55" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
             <text x="278" y="55" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
-            
+
             <text x="255" y="71" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">UK</text>
             <text x="278" y="71" font-size="10" font-family="monospace" fill="#0f172a">number : String (TKT-001)</text>
-            
+
             <text x="255" y="87" font-size="10" font-family="monospace" fill="#059669" font-weight="bold">IX</text>
             <text x="278" y="87" font-size="10" font-family="monospace" fill="#0f172a">status : Status (Enum)</text>
-            
-            <text x="278" y="103" font-size="10" font-family="monospace" fill="#0f172a">priority : Priority (Enum)</text>
-            
+
+            <text x="278" y="103" font-size="10" font-family="monospace" fill="#0f172a">priority : Priority
+              (Enum)</text>
+
             <text x="255" y="119" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="278" y="119" font-size="10" font-family="monospace" fill="#0f172a">categoryId → Category</text>
-            
+
             <text x="255" y="135" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="278" y="135" font-size="10" font-family="monospace" fill="#0f172a">createdById → User</text>
-            
+
             <text x="255" y="151" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="278" y="151" font-size="10" font-family="monospace" fill="#0f172a">assignedToId → User?</text>
-            
+
             <text x="255" y="167" font-size="10" font-family="monospace" fill="#059669" font-weight="bold">IX</text>
             <text x="278" y="167" font-size="10" font-family="monospace" fill="#0f172a">dueAt : DateTime (SLA)</text>
-            
+
             <text x="278" y="183" font-size="10" font-family="monospace" fill="#0f172a">resolvedAt : DateTime?</text>
             <text x="278" y="199" font-size="10" font-family="monospace" fill="#475569">aiCategory : String?</text>
             <text x="278" y="215" font-size="10" font-family="monospace" fill="#475569">aiConfidence : Float?</text>
@@ -445,69 +451,79 @@
 
           <!-- Comment Table -->
           <g id="table-comment">
-            <rect x="540" y="15" width="160" height="120" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2"/>
-            <path d="M 540 15 h 160 v 24 h -160 z" fill="#f1f5f9"/>
-            <text x="550" y="32" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">Comment</text>
+            <rect x="540" y="15" width="160" height="120" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 540 15 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="550" y="32" font-size="11.5" font-weight="700" fill="#0f172a"
+              font-family="sans-serif">Comment</text>
             <text x="640" y="32" font-size="9.5" fill="#64748b" font-family="sans-serif">Discussion</text>
-            <line x1="540" y1="39" x2="700" y2="39" stroke="#cbd5e1" stroke-width="1"/>
-            
+            <line x1="540" y1="39" x2="700" y2="39" stroke="#cbd5e1" stroke-width="1" />
+
             <text x="550" y="55" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
             <text x="570" y="55" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
-            
+
             <text x="550" y="71" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="570" y="71" font-size="10" font-family="monospace" fill="#0f172a">ticketId → Ticket</text>
-            
+
             <text x="550" y="87" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="570" y="87" font-size="10" font-family="monospace" fill="#0f172a">authorId → User</text>
-            
+
             <text x="570" y="103" font-size="10" font-family="monospace" fill="#0f172a">body : Text</text>
             <text x="570" y="119" font-size="10" font-family="monospace" fill="#0f172a">isInternal : Boolean</text>
           </g>
 
           <!-- ActivityLog Table -->
           <g id="table-activity">
-            <rect x="540" y="160" width="160" height="105" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2"/>
-            <path d="M 540 160 h 160 v 24 h -160 z" fill="#f1f5f9"/>
-            <text x="550" y="177" font-size="11.5" font-weight="700" fill="#0f172a" font-family="sans-serif">ActivityLog</text>
+            <rect x="540" y="160" width="160" height="105" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1.2" />
+            <path d="M 540 160 h 160 v 24 h -160 z" fill="#f1f5f9" />
+            <text x="550" y="177" font-size="11.5" font-weight="700" fill="#0f172a"
+              font-family="sans-serif">ActivityLog</text>
             <text x="645" y="177" font-size="9.5" fill="#64748b" font-family="sans-serif">Audit Trail</text>
-            <line x1="540" y1="184" x2="700" y2="184" stroke="#cbd5e1" stroke-width="1"/>
-            
+            <line x1="540" y1="184" x2="700" y2="184" stroke="#cbd5e1" stroke-width="1" />
+
             <text x="550" y="200" font-size="10" font-family="monospace" fill="#dc2626" font-weight="bold">PK</text>
             <text x="570" y="200" font-size="10" font-family="monospace" fill="#0f172a">id : UUID</text>
-            
+
             <text x="550" y="216" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="570" y="216" font-size="10" font-family="monospace" fill="#0f172a">ticketId → Ticket</text>
-            
+
             <text x="550" y="232" font-size="10" font-family="monospace" fill="#2563eb" font-weight="bold">FK</text>
             <text x="570" y="232" font-size="10" font-family="monospace" fill="#0f172a">actorId → User?</text>
-            
+
             <text x="570" y="248" font-size="10" font-family="monospace" fill="#0f172a">action : String</text>
           </g>
 
           <!-- Relationship Connectors (Clean Straight Lines in 75px Gaps) -->
           <!-- User -> Ticket (createdById) -->
-          <line x1="170" y1="55" x2="238" y2="55" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="204" y="47" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">created (1:N)</text>
+          <line x1="170" y1="55" x2="238" y2="55" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="204" y="47" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">created
+            (1:N)</text>
 
           <!-- User -> Ticket (assignedToId) -->
-          <line x1="170" y1="115" x2="238" y2="115" stroke="#334155" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
-          <text x="204" y="107" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">assigned (0..1)</text>
+          <line x1="170" y1="115" x2="238" y2="115" stroke="#334155" stroke-width="1.2" stroke-dasharray="3,3"
+            marker-end="url(#arrow)" />
+          <text x="204" y="107" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">assigned
+            (0..1)</text>
 
           <!-- Category -> Ticket (categoryId) -->
-          <line x1="170" y1="200" x2="238" y2="200" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="204" y="192" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">category (1:N)</text>
+          <line x1="170" y1="200" x2="238" y2="200" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="204" y="192" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">category
+            (1:N)</text>
 
           <!-- Ticket -> Comment (ticketId) -->
-          <line x1="465" y1="55" x2="533" y2="55" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="499" y="47" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">comments (1:N)</text>
+          <line x1="465" y1="55" x2="533" y2="55" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="499" y="47" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">comments
+            (1:N)</text>
 
           <!-- Ticket -> ActivityLog (ticketId) -->
-          <line x1="465" y1="200" x2="533" y2="200" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)"/>
-          <text x="499" y="192" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">logs (1:N)</text>
+          <line x1="465" y1="200" x2="533" y2="200" stroke="#334155" stroke-width="1.2" marker-end="url(#arrow)" />
+          <text x="499" y="192" font-size="8.5" fill="#475569" font-family="sans-serif" text-anchor="middle">logs
+            (1:N)</text>
 
           <!-- User -> Comment (authorId) -->
-          <path d="M 90 15 C 90 2, 620 2, 620 15" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
-          <text x="355" y="10" font-size="8.5" fill="#64748b" font-family="sans-serif" text-anchor="middle">author (1:N)</text>
+          <path d="M 90 15 C 90 2, 620 2, 620 15" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,3"
+            marker-end="url(#arrow)" />
+          <text x="355" y="10" font-size="8.5" fill="#64748b" font-family="sans-serif" text-anchor="middle">author
+            (1:N)</text>
         </svg>
       </div>
 
@@ -585,7 +601,7 @@
 
     <!-- ================= PAGE 2: CORE TABLES ================= -->
     <div class="print-page">
-      
+
       <h2 class="section-title">২. Database Tables & Data Dictionary (কোর স্কিমা)</h2>
 
       <!-- Table: tickets -->
@@ -778,7 +794,7 @@
 
     <!-- ================= PAGE 3: SUPPORTING TABLES & INTERVIEW DEFENSE ================= -->
     <div class="print-page">
-      
+
       <!-- Table: comments -->
       <div class="table-title" style="margin-top: 0;">
         <div><strong>comments</strong> — গ্রাহক আলোচনা ও ইন্টারনাল নোটস</div>
@@ -874,34 +890,10 @@
           </tr>
         </tbody>
       </table>
-
-      <!-- Section 3: Architecture Highlights -->
-      <h2 class="section-title">৩. Architecture Highlights & Interview Points (মূল টেকনিক্যাল যুক্তি)</h2>
-      
-      <ul class="notes-list">
-        <li>
-          <strong>ইউজার ও টিকিটের দ্বৈত সম্পর্ক (3NF Normalization):</strong> একই টেবিলে কাস্টমার (<code>createdById</code>) এবং দায়িত্বপ্রাপ্ত এজেন্ট (<code>assignedToId</code>) আলাদা ফরেন কী হিসেবে রয়েছে। এতে ডাটা ডুপ্লিকেশন পরিহার করে ৩য় নরমাল ফর্ম বজায় থাকে।
-        </li>
-        <li>
-          <strong>ডাটা-ড্রাইভেন SLA আর্কিটেকচার:</strong> SLA সময়সীমা কোডে হার্ডকোড না করে <code>Category</code> টেবিলে <code>defaultSlaHours</code> ফিল্ডে সংরক্ষিত। ডাটাবেজে কনফিগারেশন পরিবর্তনের সাথে সাথে নতুন টিকিটে তাৎক্ষণিক কার্যকর হয়।
-        </li>
-        <li>
-          <strong>ডাটাবেজ ইনডেক্সিং অপ্টিমাইজেশন (B-Tree):</strong>
-          <code>@@index([status])</code> ড্যাশবোর্ড কাউন্ট গতিশীল করে;
-          <code>@@index([dueAt])</code> ওভারডিউ কোয়েরিতে Full Table Scan রোধ করে দ্রুত রেঞ্জ স্ক্যান চালায়;
-          <code>@@index([assignedToId])</code> লোড ব্যালেন্সিংয়ে এজেন্টের পেন্ডিং কাজের চাপ দ্রুত বের করে।
-        </li>
-        <li>
-          <strong>সার্ভার-সাইড রেজোলিউশন গার্ড ও স্টেট মেশিন:</strong> গ্রাহককে সমাধান না জানিয়ে এজেন্ট যাতে অলসতাবশত টিকিট সলভ করতে না পারে, সেজন্য টিকিট <code>RESOLVED</code> করতে হলে অন্তত ১টি পাবলিক রিপ্লাই (<code>isInternal: false</code>) থাকা বাধ্যতামূলক। আর <code>CLOSED</code> হলো চূড়ান্ত টার্মিনাল স্টেট।
-        </li>
-        <li>
-          <strong>ক্যাসকেডিং ডিলিট ও অডিট ট্রেইল:</strong> টিকিট ডিলিট হলে সংশ্লিষ্ট <code>comments</code> ও <code>activity_logs</code> রেকর্ডগুলো <code>ON DELETE CASCADE</code> নিয়মে স্বয়ংক্রিয়ভাবে ক্লিন হয়ে ডাটাবেজ অরফান মুক্ত থাকে।
-        </li>
-      </ul>
-
     </div>
 
   </div>
 
 </body>
+
 </html>
